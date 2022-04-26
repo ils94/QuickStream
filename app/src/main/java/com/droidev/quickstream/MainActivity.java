@@ -347,7 +347,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void showChat() {
 
-        if (webViewChat.getVisibility() == View.GONE) {
+        if (webViewChat.getVisibility() == View.GONE && webViewStream.getVisibility() == View.VISIBLE) {
 
             webViewChat.setVisibility(View.VISIBLE);
 
