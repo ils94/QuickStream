@@ -38,12 +38,16 @@ public class MainActivity extends AppCompatActivity {
     private WebView webViewStream, webViewChat;
     private ImageView imageView;
     private LinearLayout viewLayout;
+
     private String currentStreamURL = "", currentChatURL = "", channelName = "";
+    private boolean streamLoaded = false, firstStreamLoad = false;
+
     private ArrayList<String> history;
+
     private TinyDB tinyDB;
+
     private Menu mOptionmenu;
 
-    @SuppressLint({"SetJavaScriptEnabled", "ClickableViewAccessibility"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,51 +99,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         swipeRefreshStream.setOnRefreshListener(() -> webViewStream.reload());
-
-        webViewStream.setWebViewClient(new WebViewClient() {
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-
-                if (url.equals(currentStreamURL)) {
-                    view.loadUrl(url);
-                }
-
-                return true;
-            }
-
-            public void onPageFinished(WebView view, String url) {
-
-                swipeRefreshStream.setRefreshing(false);
-            }
-        });
-
-        webViewChat.setWebViewClient(new WebViewClient() {
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-
-                if (url.equals(currentStreamURL)) {
-                    view.loadUrl(url);
-                }
-
-                return true;
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-
-                webViewChat.stopLoading();
-            }
-        });
-
-        WebSettings webSettingsStream = webViewStream.getSettings();
-        webSettingsStream.setJavaScriptEnabled(true);
-        webSettingsStream.setJavaScriptCanOpenWindowsAutomatically(false);
-        webSettingsStream.setUseWideViewPort(true);
-        webSettingsStream.setLoadWithOverviewMode(true);
-
-        WebSettings webSettingsChat = webViewChat.getSettings();
-        webSettingsChat.setJavaScriptEnabled(true);
-        webSettingsChat.setJavaScriptCanOpenWindowsAutomatically(false);
-        webSettingsChat.setUseWideViewPort(true);
-        webSettingsChat.setLoadWithOverviewMode(true);
 
         if (savedInstanceState == null) {
             webViewStream.loadUrl(currentStreamURL);
@@ -256,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
                 dialog.dismiss();
             } else {
 
-                Toast.makeText(MainActivity.this, "Error, field cannot be empty.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Error. The field cannot be empty.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -283,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
                     dialog.dismiss();
                 } else {
 
-                    Toast.makeText(MainActivity.this, "Error, field cannot be empty.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Error. The field cannot be empty.", Toast.LENGTH_SHORT).show();
                 }
 
                 return true;
@@ -321,7 +280,39 @@ public class MainActivity extends AppCompatActivity {
         startActivity(browserIntent);
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void playVideo(String urlStream) {
+
+        webViewStream.setWebViewClient(new WebViewClient() {
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+                if (url.equals(currentStreamURL)) {
+                    view.loadUrl(url);
+                }
+
+                return true;
+            }
+
+            public void onPageFinished(WebView view, String url) {
+
+                if (!swipeRefreshStream.isRefreshing()) {
+
+                    streamLoaded = true;
+
+                    firstStreamLoad = true;
+
+                    loadChat();
+                }
+
+                swipeRefreshStream.setRefreshing(false);
+            }
+        });
+
+        WebSettings webSettingsStream = webViewStream.getSettings();
+        webSettingsStream.setJavaScriptEnabled(true);
+        webSettingsStream.setJavaScriptCanOpenWindowsAutomatically(false);
+        webSettingsStream.setUseWideViewPort(true);
+        webSettingsStream.setLoadWithOverviewMode(true);
 
         webViewStream.loadUrl(urlStream);
 
@@ -353,25 +344,59 @@ public class MainActivity extends AppCompatActivity {
 
     private void showChat() {
 
-        if (webViewChat.getVisibility() == View.GONE && webViewStream.getVisibility() == View.VISIBLE) {
+        if (firstStreamLoad) {
 
-            webViewChat.setVisibility(View.VISIBLE);
+            if (webViewChat.getVisibility() == View.GONE && webViewStream.getVisibility() == View.VISIBLE) {
 
-            loadChat();
+                streamLoaded = true;
 
+                webViewChat.setVisibility(View.VISIBLE);
+
+                loadChat();
+
+            } else {
+
+                webViewChat.setVisibility(View.GONE);
+
+                webViewChat.loadUrl("javascript:document.open();document.close();");
+            }
         } else {
 
-            webViewChat.setVisibility(View.GONE);
-
-            webViewChat.loadUrl("javascript:document.open();document.close();");
+            Toast.makeText(this, "You must first open a Stream, and wait for it to finish loading.", Toast.LENGTH_LONG).show();
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void loadChat() {
 
-        if (webViewChat.getVisibility() == View.VISIBLE) {
+        if (webViewChat.getVisibility() == View.VISIBLE && streamLoaded) {
+
+            webViewChat.setWebViewClient(new WebViewClient() {
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+                    if (url.equals(currentStreamURL)) {
+                        view.loadUrl(url);
+                    }
+
+                    return true;
+                }
+
+                @Override
+                public void onPageFinished(WebView view, String url) {
+
+                    webViewChat.stopLoading();
+                }
+            });
+
+            WebSettings webSettingsChat = webViewChat.getSettings();
+            webSettingsChat.setJavaScriptEnabled(true);
+            webSettingsChat.setJavaScriptCanOpenWindowsAutomatically(false);
+            webSettingsChat.setUseWideViewPort(true);
+            webSettingsChat.setLoadWithOverviewMode(true);
 
             webViewChat.loadUrl(currentChatURL);
+
+            streamLoaded = false;
         }
     }
 
