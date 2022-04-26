@@ -121,6 +121,12 @@ public class MainActivity extends AppCompatActivity {
 
                 return true;
             }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+
+                webViewChat.stopLoading();
+            }
         });
 
         WebSettings webSettingsStream = webViewStream.getSettings();
