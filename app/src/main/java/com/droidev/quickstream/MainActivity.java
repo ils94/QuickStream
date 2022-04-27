@@ -362,7 +362,7 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setCancelable(false)
                 .setTitle("Search Channel")
-                .setMessage("Insert the Channel name of the Streamer below and choose either the Stream or Chat as the main window.")
+                .setMessage("Insert the channel name below and choose either the Stream or Chat as the main window.")
                 .setPositiveButton("Stream", null)
                 .setNegativeButton("Chat", null)
                 .setNeutralButton("Cancel", null)
