@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
     private String currentStreamURL = "", currentChatURL = "", channelName = "", mainWindow = "";
 
+    private Boolean exit = false;
+
     private ArrayList<String> history;
 
     private TinyDB tinyDB;
@@ -564,7 +566,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private Boolean exit = false;
     @Override
     public void onBackPressed() {
         if (exit) {
