@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -563,24 +564,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private Boolean exit = false;
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setCancelable(false)
-                .setTitle("Exit App")
-                .setMessage("Do you want to exit the app?")
-                .setPositiveButton("Yes", null)
-                .setNegativeButton("No", null)
-                .show();
-
-        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-
-        positiveButton.setOnClickListener(v -> {
-
+        if (exit) {
             finish();
-        });
-
+        } else {
+            Toast.makeText(this, "Press Back again to Exit.",
+                    Toast.LENGTH_SHORT).show();
+            exit = true;
+            new Handler().postDelayed(() -> exit = false, 3 * 1000);
+        }
     }
 }
