@@ -39,15 +39,22 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imageView;
     private LinearLayout viewLayout;
 
-    private String currentStreamURL = "", currentChatURL = "", channelName = "";
-
-    private String mainWindow = "";
+    private String currentStreamURL = "", currentChatURL = "", channelName = "", mainWindow = "";
 
     private ArrayList<String> history;
 
     private TinyDB tinyDB;
 
-    private Menu mOptionmenu;
+    private Menu optionMenu;
+
+    private void showInfos(){
+
+        setTitle("twitch.tv/" + channelName);
+
+        optionMenu.findItem(R.id.openBrowser).setEnabled(true);
+        optionMenu.findItem(R.id.streamerChannel).setEnabled(true);
+        optionMenu.findItem(R.id.streamerChannel).setTitle("Go to twitch.tv/" + channelName);
+    }
 
     private void clearHistory() {
 
@@ -114,6 +121,63 @@ public class MainActivity extends AppCompatActivity {
         webViewChat.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, chat));
     }
 
+    private void alternate() {
+
+        if (mainWindow.equals("Stream")) {
+
+            createChatInterface();
+        } else if (mainWindow.equals("Chat")) {
+
+            createStreamInterface();
+        }
+    }
+
+    private void createStreamInterface() {
+
+        webViewChat.loadUrl("about:blank");
+
+        imageView.setVisibility(View.GONE);
+
+        webViewChat.setVisibility(View.GONE);
+
+        optionMenu.findItem(R.id.showChat).setVisible(true);
+        optionMenu.findItem(R.id.refresh).setVisible(false);
+        optionMenu.findItem(R.id.showStream).setVisible(false);
+        optionMenu.findItem(R.id.alternate).setEnabled(true);
+        optionMenu.findItem(R.id.alternate).setTitle("Chat as Main Window");
+
+        swipeRefreshStream.setVisibility(View.VISIBLE);
+
+        webViewStream.setVisibility(View.VISIBLE);
+
+        loadStream();
+
+        mainWindow = "Stream";
+    }
+
+    private void createChatInterface() {
+
+        webViewStream.loadUrl("about:blank");
+
+        imageView.setVisibility(View.GONE);
+
+        swipeRefreshStream.setVisibility(View.GONE);
+
+        webViewStream.setVisibility(View.GONE);
+
+        optionMenu.findItem(R.id.showChat).setVisible(false);
+        optionMenu.findItem(R.id.refresh).setVisible(true);
+        optionMenu.findItem(R.id.showStream).setVisible(true);
+        optionMenu.findItem(R.id.alternate).setEnabled(true);
+        optionMenu.findItem(R.id.alternate).setTitle("Stream as Main Window");
+
+        webViewChat.setVisibility(View.VISIBLE);
+
+        loadChat();
+
+        mainWindow = "Chat";
+    }
+
     private void showChat() {
 
         if (webViewChat.getVisibility() == View.GONE && webViewStream.getVisibility() == View.VISIBLE) {
@@ -124,9 +188,9 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
 
-            webViewChat.setVisibility(View.GONE);
+            webViewChat.loadUrl("about:blank");
 
-            webViewChat.loadUrl("javascript:document.open();document.close();");
+            webViewChat.setVisibility(View.GONE);
         }
 
     }
@@ -143,17 +207,93 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
 
+            webViewStream.loadUrl("about:blank");
+
             swipeRefreshStream.setVisibility(View.GONE);
 
             webViewStream.setVisibility(View.GONE);
-
-            webViewStream.loadUrl("javascript:document.open();document.close();");
         }
 
     }
 
+    private void loadChat() {
+
+        createWebViewChat();
+
+        if (!history.contains(channelName)) {
+
+            tinyDB.remove("history");
+            history.add(channelName);
+            tinyDB.putListString("history", history);
+        }
+
+        int orientation = this.getResources().getConfiguration().orientation;
+
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+
+            layoutConfig(LinearLayout.HORIZONTAL, 30, 70);
+        } else {
+
+            layoutConfig(LinearLayout.VERTICAL, 50, 50);
+        }
+    }
+
+    private void loadStream() {
+
+        createWebViewStream();
+
+        if (!history.contains(channelName)) {
+
+            tinyDB.remove("history");
+            history.add(channelName);
+            tinyDB.putListString("history", history);
+        }
+
+        int orientation = this.getResources().getConfiguration().orientation;
+
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+
+            layoutConfig(LinearLayout.HORIZONTAL, 30, 70);
+        } else {
+
+            layoutConfig(LinearLayout.VERTICAL, 50, 50);
+        }
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
-    private void loadChat(String urlChat) {
+    private void createWebViewStream() {
+
+        webViewStream.setWebViewClient(new WebViewClient() {
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+
+                if (url.equals(currentStreamURL)) {
+                    view.loadUrl(url);
+                }
+
+                return true;
+            }
+
+            public void onPageFinished(WebView view, String url) {
+
+                swipeRefreshStream.setRefreshing(false);
+
+                webViewStream.stopLoading();
+
+                Toast.makeText(MainActivity.this, "Long press the video stream window to enter fullscreen.", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        WebSettings webSettingsStream = webViewStream.getSettings();
+        webSettingsStream.setJavaScriptEnabled(true);
+        webSettingsStream.setJavaScriptCanOpenWindowsAutomatically(false);
+        webSettingsStream.setUseWideViewPort(true);
+        webSettingsStream.setLoadWithOverviewMode(true);
+
+        webViewStream.loadUrl(currentStreamURL);
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private void createWebViewChat() {
 
         webViewChat.setWebViewClient(new WebViewClient() {
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -177,83 +317,7 @@ public class MainActivity extends AppCompatActivity {
         webSettingsStream.setUseWideViewPort(true);
         webSettingsStream.setLoadWithOverviewMode(true);
 
-        webViewChat.loadUrl(urlChat);
-
-        if (!history.contains(channelName)) {
-
-            tinyDB.remove("history");
-            history.add(channelName);
-            tinyDB.putListString("history", history);
-        }
-
-        setTitle("twitch.tv/" + channelName);
-
-        mOptionmenu.findItem(R.id.openBrowser).setEnabled(true);
-        mOptionmenu.findItem(R.id.streamerChannel).setEnabled(true);
-        mOptionmenu.findItem(R.id.streamerChannel).setTitle("Go to twitch.tv/" + channelName);
-
-        int orientation = this.getResources().getConfiguration().orientation;
-
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-
-            layoutConfig(LinearLayout.HORIZONTAL, 30, 70);
-        } else {
-
-            layoutConfig(LinearLayout.VERTICAL, 50, 50);
-        }
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private void loadStream(String urlStream) {
-
-        webViewStream.setWebViewClient(new WebViewClient() {
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-
-                if (url.equals(currentStreamURL)) {
-                    view.loadUrl(url);
-                }
-
-                return true;
-            }
-
-            public void onPageFinished(WebView view, String url) {
-
-                swipeRefreshStream.setEnabled(false);
-
-                webViewStream.stopLoading();
-            }
-        });
-
-        WebSettings webSettingsStream = webViewStream.getSettings();
-        webSettingsStream.setJavaScriptEnabled(true);
-        webSettingsStream.setJavaScriptCanOpenWindowsAutomatically(false);
-        webSettingsStream.setUseWideViewPort(true);
-        webSettingsStream.setLoadWithOverviewMode(true);
-
-        webViewStream.loadUrl(urlStream);
-
-        if (!history.contains(channelName)) {
-
-            tinyDB.remove("history");
-            history.add(channelName);
-            tinyDB.putListString("history", history);
-        }
-
-        setTitle("twitch.tv/" + channelName);
-
-        mOptionmenu.findItem(R.id.openBrowser).setEnabled(true);
-        mOptionmenu.findItem(R.id.streamerChannel).setEnabled(true);
-        mOptionmenu.findItem(R.id.streamerChannel).setTitle("Go to twitch.tv/" + channelName);
-
-        int orientation = this.getResources().getConfiguration().orientation;
-
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-
-            layoutConfig(LinearLayout.HORIZONTAL, 30, 70);
-        } else {
-
-            layoutConfig(LinearLayout.VERTICAL, 50, 50);
-        }
+        webViewChat.loadUrl(currentChatURL);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -261,30 +325,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (webViewChat.getVisibility() == View.VISIBLE) {
 
-            webViewChat.setWebViewClient(new WebViewClient() {
-                public boolean shouldOverrideUrlLoading(WebView view, String url) {
-
-                    if (url.equals(currentChatURL)) {
-                        view.loadUrl(url);
-                    }
-
-                    return true;
-                }
-
-                @Override
-                public void onPageFinished(WebView view, String url) {
-
-                    webViewChat.stopLoading();
-                }
-            });
-
-            WebSettings webSettingsChat = webViewChat.getSettings();
-            webSettingsChat.setJavaScriptEnabled(true);
-            webSettingsChat.setJavaScriptCanOpenWindowsAutomatically(false);
-            webSettingsChat.setUseWideViewPort(true);
-            webSettingsChat.setLoadWithOverviewMode(true);
-
-            webViewChat.loadUrl(currentChatURL);
+            createWebViewChat();
         }
     }
 
@@ -293,24 +334,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (webViewChat.getVisibility() == View.VISIBLE) {
 
-            webViewStream.setWebViewClient(new WebViewClient() {
-                public boolean shouldOverrideUrlLoading(WebView view, String url) {
-
-                    if (url.equals(currentStreamURL)) {
-                        view.loadUrl(url);
-                    }
-
-                    return true;
-                }
-            });
-
-            WebSettings webSettingsChat = webViewStream.getSettings();
-            webSettingsChat.setJavaScriptEnabled(true);
-            webSettingsChat.setJavaScriptCanOpenWindowsAutomatically(false);
-            webSettingsChat.setUseWideViewPort(true);
-            webSettingsChat.setLoadWithOverviewMode(true);
-
-            webViewStream.loadUrl(currentStreamURL);
+            createWebViewStream();
         }
     }
 
@@ -318,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
     private void searchStreamer() {
 
         AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(this);
-        autoCompleteTextView.setHint("Insert channel name here");
+        autoCompleteTextView.setHint("Insert Channel name here");
         autoCompleteTextView.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         autoCompleteTextView.setInputType(InputType.TYPE_CLASS_TEXT);
         autoCompleteTextView.setMaxLines(1);
@@ -329,8 +353,8 @@ public class MainActivity extends AppCompatActivity {
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setCancelable(false)
-                .setTitle("Search for Streamer")
-                .setMessage("Insert the channel name of the Streamer below.\n\nStream: to open Stream as main window.\n\nChat: to open chat as main window.")
+                .setTitle("Search Channel")
+                .setMessage("Insert the Channel name of the Streamer below and choose either the Stream or Chat as the main window.")
                 .setPositiveButton("Stream", null)
                 .setNegativeButton("Chat", null)
                 .setNeutralButton("Cancel", null)
@@ -359,23 +383,9 @@ public class MainActivity extends AppCompatActivity {
 
             if (!autoCompleteTextView.getText().toString().equals("")) {
 
-                imageView.setVisibility(View.GONE);
+                createStreamInterface();
 
-                webViewChat.setVisibility(View.GONE);
-
-                mOptionmenu.findItem(R.id.showChat).setVisible(true);
-                mOptionmenu.findItem(R.id.refresh).setVisible(false);
-                mOptionmenu.findItem(R.id.showStream).setVisible(false);
-
-                webViewChat.loadUrl("javascript:document.open();document.close();");
-
-                swipeRefreshStream.setVisibility(View.VISIBLE);
-
-                webViewStream.setVisibility(View.VISIBLE);
-
-                loadStream(currentStreamURL);
-
-                mainWindow = "Stream";
+                showInfos();
 
                 dialog.dismiss();
             } else {
@@ -390,23 +400,9 @@ public class MainActivity extends AppCompatActivity {
 
             if (!autoCompleteTextView.getText().toString().equals("")) {
 
-                imageView.setVisibility(View.GONE);
+                createChatInterface();
 
-                swipeRefreshStream.setVisibility(View.GONE);
-
-                webViewStream.setVisibility(View.GONE);
-
-                mOptionmenu.findItem(R.id.showChat).setVisible(false);
-                mOptionmenu.findItem(R.id.refresh).setVisible(true);
-                mOptionmenu.findItem(R.id.showStream).setVisible(true);
-
-                webViewStream.loadUrl("javascript:document.open();document.close();");
-
-                webViewChat.setVisibility(View.VISIBLE);
-
-                loadChat(currentChatURL);
-
-                mainWindow = "Chat";
+                showInfos();
 
                 dialog.dismiss();
             } else {
@@ -414,7 +410,6 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Error. The field cannot be empty.", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -442,7 +437,13 @@ public class MainActivity extends AppCompatActivity {
 
             case R.id.refresh:
 
-                loadChat(currentChatURL);
+                loadChat();
+
+                break;
+
+            case R.id.alternate:
+
+                alternate();
 
                 break;
 
@@ -470,10 +471,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_menu, menu);
 
-        mOptionmenu = menu;
+        optionMenu = menu;
 
-        mOptionmenu.findItem(R.id.openBrowser).setEnabled(false);
-        mOptionmenu.findItem(R.id.streamerChannel).setEnabled(false);
+        optionMenu.findItem(R.id.openBrowser).setEnabled(false);
+        optionMenu.findItem(R.id.streamerChannel).setEnabled(false);
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -519,6 +520,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -554,20 +556,11 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
 
-        webViewChat.setOnLongClickListener(view -> {
-
-            fullScreen();
-
-            return false;
-        });
-
-        swipeRefreshStream.setOnRefreshListener(() -> loadStream(currentStreamURL));
+        swipeRefreshStream.setOnRefreshListener(this::loadStream);
 
         if (savedInstanceState == null) {
             webViewStream.loadUrl(currentStreamURL);
             webViewChat.loadUrl(currentChatURL);
         }
-
-        Toast.makeText(this, "Long press the Stream Video to enter fullscreen.", Toast.LENGTH_LONG).show();
     }
 }

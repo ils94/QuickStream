@@ -30,14 +30,21 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/clearHistory"
-        android:title="Clear History" />
+        android:id="@+id/alternate"
+        android:title="Alternate Main Window"
+        android:enabled="false"/>
 
     <item
         android:id="@+id/openBrowser"
-        android:title="Open Stream on Browser" />
+        android:title="Open Stream on Browser"
+        android:enabled="false"/>
 
     <item
         android:id="@+id/streamerChannel"
-        android:title="Go to Channel" />
+        android:title="Go to Channel"
+        android:enabled="false"/>
+
+    <item
+        android:id="@+id/clearHistory"
+        android:title="Clear History" />
 </menu>
