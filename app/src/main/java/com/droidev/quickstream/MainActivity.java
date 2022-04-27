@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 layoutConfig(LinearLayout.HORIZONTAL, 50, 50);
             } else {
 
-                layoutConfig(LinearLayout.VERTICAL, 50, 50);
+                layoutConfig(LinearLayout.VERTICAL, 70, 30);
             }
         } else if (mainWindow.equals("Stream")) {
 
@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                 layoutConfig(LinearLayout.HORIZONTAL, 30, 70);
             } else {
 
-                layoutConfig(LinearLayout.VERTICAL, 50, 50);
+                layoutConfig(LinearLayout.VERTICAL, 70, 30);
             }
         }
     }
@@ -513,7 +513,7 @@ public class MainActivity extends AppCompatActivity {
 
             } else {
 
-                layoutConfig(LinearLayout.VERTICAL, 50f, 50f);
+                layoutConfig(LinearLayout.VERTICAL, 70f, 30f);
             }
         } else if (mainWindow.equals("Chat")) {
 
@@ -523,7 +523,7 @@ public class MainActivity extends AppCompatActivity {
 
             } else {
 
-                layoutConfig(LinearLayout.VERTICAL, 50f, 50f);
+                layoutConfig(LinearLayout.VERTICAL, 70f, 30f);
             }
         }
     }
