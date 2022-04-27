@@ -12,6 +12,21 @@
         android:id="@+id/showChat"
         android:icon="@drawable/chat"
         android:title="Show Chat"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/showStream"
+        android:icon="@drawable/stream"
+        android:title="Stream"
+        android:visible="false"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/refresh"
+        android:icon="@drawable/refresh"
+        android:title="Refresh"
+        android:visible="false"
         app:showAsAction="always" />
 
     <item
