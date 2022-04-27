@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Menu optionMenu;
 
-    private void showInfos(){
+    private void showInfos() {
 
         setTitle("twitch.tv/" + channelName);
 
@@ -343,7 +343,6 @@ public class MainActivity extends AppCompatActivity {
 
         AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(this);
         autoCompleteTextView.setHint("Insert Channel name here");
-        autoCompleteTextView.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         autoCompleteTextView.setInputType(InputType.TYPE_CLASS_TEXT);
         autoCompleteTextView.setMaxLines(1);
 
@@ -562,5 +561,26 @@ public class MainActivity extends AppCompatActivity {
             webViewStream.loadUrl(currentStreamURL);
             webViewChat.loadUrl(currentChatURL);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle("Exit App")
+                .setMessage("Do you want to exit the app?")
+                .setPositiveButton("Yes", null)
+                .setNegativeButton("No", null)
+                .show();
+
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+
+        positiveButton.setOnClickListener(v -> {
+
+            finish();
+        });
+
     }
 }
