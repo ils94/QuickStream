@@ -124,6 +124,31 @@ public class MainActivity extends AppCompatActivity {
         webViewChat.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, chat));
     }
 
+    private void adjustWebViewsRatio() {
+
+        int orientation = this.getResources().getConfiguration().orientation;
+
+        if (mainWindow.equals("Chat")) {
+
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+
+                layoutConfig(LinearLayout.HORIZONTAL, 50, 50);
+            } else {
+
+                layoutConfig(LinearLayout.VERTICAL, 50, 50);
+            }
+        } else if (mainWindow.equals("Stream")) {
+
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+
+                layoutConfig(LinearLayout.HORIZONTAL, 30, 70);
+            } else {
+
+                layoutConfig(LinearLayout.VERTICAL, 50, 50);
+            }
+        }
+    }
+
     private void alternate() {
 
         if (mainWindow.equals("Stream")) {
@@ -136,6 +161,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createStreamInterface() {
+
+        mainWindow = "Stream";
 
         webViewChat.loadUrl("about:blank");
 
@@ -154,11 +181,11 @@ public class MainActivity extends AppCompatActivity {
         webViewStream.setVisibility(View.VISIBLE);
 
         loadStream();
-
-        mainWindow = "Stream";
     }
 
     private void createChatInterface() {
+
+        mainWindow = "Chat";
 
         webViewStream.loadUrl("about:blank");
 
@@ -177,8 +204,6 @@ public class MainActivity extends AppCompatActivity {
         webViewChat.setVisibility(View.VISIBLE);
 
         loadChat();
-
-        mainWindow = "Chat";
     }
 
     private void showChat() {
@@ -230,15 +255,7 @@ public class MainActivity extends AppCompatActivity {
             tinyDB.putListString("history", history);
         }
 
-        int orientation = this.getResources().getConfiguration().orientation;
-
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-
-            layoutConfig(LinearLayout.HORIZONTAL, 30, 70);
-        } else {
-
-            layoutConfig(LinearLayout.VERTICAL, 50, 50);
-        }
+        adjustWebViewsRatio();
     }
 
     private void loadStream() {
@@ -252,15 +269,7 @@ public class MainActivity extends AppCompatActivity {
             tinyDB.putListString("history", history);
         }
 
-        int orientation = this.getResources().getConfiguration().orientation;
-
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-
-            layoutConfig(LinearLayout.HORIZONTAL, 30, 70);
-        } else {
-
-            layoutConfig(LinearLayout.VERTICAL, 50, 50);
-        }
+        adjustWebViewsRatio();
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -279,10 +288,6 @@ public class MainActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
 
                 swipeRefreshStream.setRefreshing(false);
-
-                webViewStream.stopLoading();
-
-                Toast.makeText(MainActivity.this, "Long press the video stream window to enter fullscreen.", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -346,6 +351,7 @@ public class MainActivity extends AppCompatActivity {
 
         AutoCompleteTextView autoCompleteTextView = new AutoCompleteTextView(this);
         autoCompleteTextView.setHint("Insert Channel name here");
+        autoCompleteTextView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         autoCompleteTextView.setInputType(InputType.TYPE_CLASS_TEXT);
         autoCompleteTextView.setMaxLines(1);
 
@@ -564,6 +570,8 @@ public class MainActivity extends AppCompatActivity {
             webViewStream.loadUrl(currentStreamURL);
             webViewChat.loadUrl(currentChatURL);
         }
+
+        Toast.makeText(MainActivity.this, "Long press the video stream window to enter fullscreen.", Toast.LENGTH_LONG).show();
     }
 
     @Override

@@ -18,31 +18,31 @@
     <item
         android:id="@+id/showStream"
         android:icon="@drawable/stream"
-        android:title="Stream"
+        android:title="Show Stream"
         android:visible="false"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/refresh"
         android:icon="@drawable/refresh"
-        android:title="Refresh"
+        android:title="Refresh Chat"
         android:visible="false"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/alternate"
-        android:title="Alternate Main Window"
-        android:enabled="false"/>
+        android:enabled="false"
+        android:title="Alternate Main Window" />
 
     <item
         android:id="@+id/openBrowser"
-        android:title="Open Stream on Browser"
-        android:enabled="false"/>
+        android:enabled="false"
+        android:title="Open Stream on Browser" />
 
     <item
         android:id="@+id/streamerChannel"
-        android:title="Go to Channel"
-        android:enabled="false"/>
+        android:enabled="false"
+        android:title="Go to Channel" />
 
     <item
         android:id="@+id/clearHistory"
