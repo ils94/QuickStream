@@ -26,6 +26,7 @@ import android.webkit.WebViewClient;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     private SwipeRefreshLayout swipeRefreshStream;
     private WebView webViewStream, webViewChat;
+    private FrameLayout frameLayoutChat;
     private ImageView imageView;
     private LinearLayout viewLayout;
 
@@ -118,10 +120,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void layoutConfig(int orientation, float stream, float chat) {
 
+        LinearLayout.LayoutParams swipeParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, stream);
+        LinearLayout.LayoutParams chatParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, chat);
+
         viewLayout.setOrientation(orientation);
 
-        swipeRefreshStream.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, stream));
-        webViewChat.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, chat));
+        swipeRefreshStream.setLayoutParams(swipeParams);
+        webViewStream.setLayoutParams(swipeParams);
+        frameLayoutChat.setLayoutParams(chatParams);
     }
 
     private void adjustWebViewsRatio() {
@@ -168,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
 
         imageView.setVisibility(View.GONE);
 
-        webViewChat.setVisibility(View.GONE);
+        frameLayoutChat.setVisibility(View.GONE);
 
         optionMenu.findItem(R.id.showChat).setVisible(true);
         optionMenu.findItem(R.id.refresh).setVisible(false);
@@ -177,8 +183,6 @@ public class MainActivity extends AppCompatActivity {
         optionMenu.findItem(R.id.alternate).setTitle("Chat as Main Window");
 
         swipeRefreshStream.setVisibility(View.VISIBLE);
-
-        webViewStream.setVisibility(View.VISIBLE);
 
         loadStream();
     }
@@ -193,24 +197,22 @@ public class MainActivity extends AppCompatActivity {
 
         swipeRefreshStream.setVisibility(View.GONE);
 
-        webViewStream.setVisibility(View.GONE);
-
         optionMenu.findItem(R.id.showChat).setVisible(false);
         optionMenu.findItem(R.id.refresh).setVisible(true);
         optionMenu.findItem(R.id.showStream).setVisible(true);
         optionMenu.findItem(R.id.alternate).setEnabled(true);
         optionMenu.findItem(R.id.alternate).setTitle("Stream as Main Window");
 
-        webViewChat.setVisibility(View.VISIBLE);
+        frameLayoutChat.setVisibility(View.VISIBLE);
 
         loadChat();
     }
 
     private void showChat() {
 
-        if (webViewChat.getVisibility() == View.GONE && webViewStream.getVisibility() == View.VISIBLE) {
+        if (frameLayoutChat.getVisibility() == View.GONE && swipeRefreshStream.getVisibility() == View.VISIBLE) {
 
-            webViewChat.setVisibility(View.VISIBLE);
+            frameLayoutChat.setVisibility(View.VISIBLE);
 
             loadStreamChat();
 
@@ -218,18 +220,16 @@ public class MainActivity extends AppCompatActivity {
 
             webViewChat.loadUrl("about:blank");
 
-            webViewChat.setVisibility(View.GONE);
+            frameLayoutChat.setVisibility(View.GONE);
         }
 
     }
 
     private void showStream() {
 
-        if (webViewStream.getVisibility() == View.GONE && webViewChat.getVisibility() == View.VISIBLE) {
+        if (swipeRefreshStream.getVisibility() == View.GONE && frameLayoutChat.getVisibility() == View.VISIBLE) {
 
             swipeRefreshStream.setVisibility(View.VISIBLE);
-
-            webViewStream.setVisibility(View.VISIBLE);
 
             loadChatStream();
 
@@ -238,8 +238,6 @@ public class MainActivity extends AppCompatActivity {
             webViewStream.loadUrl("about:blank");
 
             swipeRefreshStream.setVisibility(View.GONE);
-
-            webViewStream.setVisibility(View.GONE);
         }
 
     }
@@ -331,7 +329,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("SetJavaScriptEnabled")
     private void loadStreamChat() {
 
-        if (webViewChat.getVisibility() == View.VISIBLE) {
+        if (frameLayoutChat.getVisibility() == View.VISIBLE) {
 
             createWebViewChat();
         }
@@ -340,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("SetJavaScriptEnabled")
     private void loadChatStream() {
 
-        if (webViewChat.getVisibility() == View.VISIBLE) {
+        if (frameLayoutChat.getVisibility() == View.VISIBLE) {
 
             createWebViewStream();
         }
@@ -509,21 +507,21 @@ public class MainActivity extends AppCompatActivity {
 
             if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 
-                layoutConfig(LinearLayout.HORIZONTAL, 30f, 70f);
+                layoutConfig(LinearLayout.HORIZONTAL, 30, 70);
 
             } else {
 
-                layoutConfig(LinearLayout.VERTICAL, 70f, 30f);
+                layoutConfig(LinearLayout.VERTICAL, 70, 30);
             }
         } else if (mainWindow.equals("Chat")) {
 
             if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
 
-                layoutConfig(LinearLayout.HORIZONTAL, 50f, 50f);
+                layoutConfig(LinearLayout.HORIZONTAL, 50, 50);
 
             } else {
 
-                layoutConfig(LinearLayout.VERTICAL, 70f, 30f);
+                layoutConfig(LinearLayout.VERTICAL, 70, 30);
             }
         }
     }
@@ -547,11 +545,15 @@ public class MainActivity extends AppCompatActivity {
 
         swipeRefreshStream = findViewById(R.id.swipeRefreshStream);
 
-        webViewStream = findViewById(R.id.webViewStream);
-        webViewStream.setBackgroundColor(Color.TRANSPARENT);
+        frameLayoutChat = findViewById(R.id.frameLayoutChat);
 
-        webViewChat = findViewById(R.id.webViewChat);
-        webViewChat.setBackgroundColor(Color.TRANSPARENT);
+        webViewStream = new WebView(getApplicationContext());
+
+        webViewChat = new WebView(getApplicationContext());
+
+        swipeRefreshStream.addView(webViewStream);
+
+        frameLayoutChat.addView(webViewChat);
 
         history = new ArrayList<>();
 
@@ -584,5 +586,14 @@ public class MainActivity extends AppCompatActivity {
             exit = true;
             new Handler().postDelayed(() -> exit = false, 3 * 1000);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        swipeRefreshStream.removeAllViews();
+        frameLayoutChat.removeAllViews();
+        webViewStream.destroy();
+        webViewChat.destroy();
     }
 }

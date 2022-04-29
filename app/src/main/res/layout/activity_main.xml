@@ -23,18 +23,12 @@
         android:layout_height="match_parent"
         android:visibility="gone">
 
-        <WebView
-            android:id="@+id/webViewStream"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone" />
-
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <WebView
-        android:id="@+id/webViewChat"
+    <FrameLayout
+        android:id="@+id/frameLayoutChat"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone" />
+        android:visibility="gone"/>
 
 </LinearLayout>
