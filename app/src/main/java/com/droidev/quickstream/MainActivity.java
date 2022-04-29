@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
 
             frameLayoutChat.setVisibility(View.VISIBLE);
 
-            loadStreamChat();
+            createWebViewChat();
 
         } else {
 
@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
 
             swipeRefreshStream.setVisibility(View.VISIBLE);
 
-            loadChatStream();
+            createWebViewStream();
 
         } else {
 
@@ -324,24 +324,6 @@ public class MainActivity extends AppCompatActivity {
         webSettingsStream.setLoadWithOverviewMode(true);
 
         webViewChat.loadUrl(currentChatURL);
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private void loadStreamChat() {
-
-        if (frameLayoutChat.getVisibility() == View.VISIBLE) {
-
-            createWebViewChat();
-        }
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private void loadChatStream() {
-
-        if (frameLayoutChat.getVisibility() == View.VISIBLE) {
-
-            createWebViewStream();
-        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
