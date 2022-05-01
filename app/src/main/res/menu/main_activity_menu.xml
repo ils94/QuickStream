@@ -30,6 +30,10 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/rotation"
+        android:title="Rotation Unlocked" />
+
+    <item
         android:id="@+id/alternate"
         android:enabled="false"
         android:title="Alternate Main Window" />

@@ -8,6 +8,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -45,12 +46,37 @@ public class MainActivity extends AppCompatActivity {
     private String currentStreamURL = "", currentChatURL = "", channelName = "", mainWindow = "";
 
     private Boolean exit = false;
+    private String rotationlock = "unlocked";
 
     private ArrayList<String> history;
 
     private TinyDB tinyDB;
 
     private Menu optionMenu;
+
+    private void lockUnlockRotation() {
+
+        if (rotationlock.equals("unlocked")) {
+
+            rotationlock = "locked";
+
+            Toast.makeText(this, "Rotation is locked", Toast.LENGTH_SHORT).show();
+
+            optionMenu.findItem(R.id.rotation).setTitle("Rotation Locked");
+
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LOCKED);
+
+        } else if (rotationlock.equals("locked")) {
+
+            rotationlock = "unlocked";
+
+            Toast.makeText(this, "Rotation is unlocked", Toast.LENGTH_SHORT).show();
+
+            optionMenu.findItem(R.id.rotation).setTitle("Rotation Unlocked");
+
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+        }
+    }
 
     private void showInfos() {
 
@@ -426,6 +452,12 @@ public class MainActivity extends AppCompatActivity {
             case R.id.refresh:
 
                 loadChat();
+
+                break;
+
+            case R.id.rotation:
+
+                lockUnlockRotation();
 
                 break;
 
